@@ -3,5 +3,23 @@
 version = 3
 
 [[package]]
+name = "fixed"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "927508466171aebfb897b96dcbee04060a73ce0a466dba3a6b9b81bc17c35f04"
+dependencies = [
+ "typenum",
+]
+
+[[package]]
 name = "mean_median_mode"
 version = "0.1.0"
+dependencies = [
+ "fixed",
+]
+
+[[package]]
+name = "typenum"
+version = "1.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b63708a265f51345575b27fe43f9500ad611579e764c79edbc2037b1121959ec"

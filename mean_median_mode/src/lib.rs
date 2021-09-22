@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub fn find_mmm(num_list: Vec<f64>) -> [f64; 3] {
     // Find mean, median, and mode of the Vector list of floats.
     // Iterate over vector:
@@ -9,15 +11,28 @@ pub fn find_mmm(num_list: Vec<f64>) -> [f64; 3] {
     //   and a Tuple, most_num, storing the currently known most numerous number
     //   where most_num.0 is a float from the input vec and most_num.1 the count of that float.
     //   On each iteration, update num_counts for the current vec element, n.
-    //   Then check where most_num.1 is less than num_counts.get(n).
+    //   Then check whether most_num.1 is less than num_counts.get(n).
     //   If so, update most_num with n and the count of n
     let mut mmm = [0., 0., 0.];
     let mut sum = 0.;
 
     mmm[1] = get_median(&num_list);
 
-    for n in &num_list {
-        sum += n;
+    let mut num_counts: HashMap<String, u32> = HashMap::new();
+    let mut most_num: (u32, &String) = (0, &num_list[0].to_string());
+
+    for x in &num_list {
+        // Add to sum
+        sum += x;
+
+        // Increment counter for x
+        let string_x = x.to_string();
+        let count = num_counts.entry(string_x).or_insert(0);
+        *count += 1;
+
+        if most_num.0 < *count {
+            most_num = (*count, &string_x);
+        }
     }
     
     mmm
@@ -87,7 +102,16 @@ mod tests {
     }
 
     #[test]
-    fn test_how_tests_work() {
-        assert!([1., 2., 3.] == [1., 2., 3.]);
+    fn lossless_float_to_string_and_back() {
+        let mut f = 1.23456789;
+        f = f / 2.;
+
+        let s = f.to_string();
+
+        assert_eq!(s, "0.617283945");
+
+        f = s.parse().unwrap();
+
+        assert_eq!(f, 0.617283945);
     }
 }
