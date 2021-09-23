@@ -16,10 +16,11 @@ pub fn find_mmm(num_list: Vec<f64>) -> [f64; 3] {
     let mut mmm = [0., 0., 0.];
     let mut sum = 0.;
 
-    mmm[1] = get_median(&num_list);
+    let median = get_median(&num_list);
 
     let mut num_counts: HashMap<String, u32> = HashMap::new();
-    let mut most_num: (u32, &String) = (0, &num_list[0].to_string());
+    let mut most_num: String = "".to_string();
+    let mut most_count: u32 = 0;
 
     for x in &num_list {
         // Add to sum
@@ -27,14 +28,23 @@ pub fn find_mmm(num_list: Vec<f64>) -> [f64; 3] {
 
         // Increment counter for x
         let string_x = x.to_string();
-        let count = num_counts.entry(string_x).or_insert(0);
+        let count = num_counts.entry(string_x.clone()).or_insert(0);
         *count += 1;
 
-        if most_num.0 < *count {
-            most_num = (*count, &string_x);
+        if most_count < *count {
+            most_num = string_x.clone();
+            most_count = *count;
         }
     }
+
+    let mode: f64 = most_num.parse().unwrap(); // TODO: prefer handling Err explicitly
     
+    let mean = sum / num_list.len() as f64;
+
+    mmm[0] = mean;
+    mmm[1] = median;
+    mmm[2] = mode;
+
     mmm
 }
 
@@ -89,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    fn it_gives_expected_mode() {
+    fn it_gives_expected_mean_med_mode() {
         let test_list: Vec<f64> = vec![1., 1., 1., 5., 2.];
         
         // Expect mean 2.
@@ -98,7 +108,7 @@ mod tests {
         let mmm = find_mmm(test_list);
         let expect_mmm = [2., 1., 1.];
 
-        assert!(mmm == expect_mmm);
+        assert!(mmm == expect_mmm, "Expected mean, median, and mode {:?}, got {:?}", expect_mmm, mmm);
     }
 
     #[test]
