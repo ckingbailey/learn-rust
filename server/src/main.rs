@@ -1,6 +1,8 @@
-use std::io::prelude::*;
-use std::net::TcpStream;
-use std::net::TcpListener;
+use std::{
+    fs,
+    io::{prelude::*, BufReader},
+    net::{TcpStream, TcpListener},
+};
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
@@ -13,12 +15,19 @@ fn main() {
 }
 
 fn handle_connection(mut stream: TcpStream) {
-    let mut buffer = [0; 1024];
+    let buf_reader = BufReader::new(&mut stream);
+    let http_request: Vec<_> = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
 
-    stream.read(&mut buffer).unwrap();
+    let status_line = "HTTP/1.1 200 OK";
+    let contents = fs::read_to_string("hello.html").unwrap();
+    let content_length = contents.len();
 
-    let response = "HTTP/1.1 200 OK\r\n\r\n";
+    let response =
+        format!("{status_line}\r\nContent-Length: {content_length}\r\n\r\n{contents}");
 
-    stream.write(response.as_bytes()).unwrap();
-    stream.flush().unwrap();
+    stream.write_all(response.as_bytes()).unwrap();
 }
