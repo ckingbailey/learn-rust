@@ -5,8 +5,10 @@ use std::{
 };
 
 fn main() {
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let port = "7878";
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", 7878)).unwrap();
 
+    println!("Listending on {}", port);
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
