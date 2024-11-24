@@ -9,12 +9,13 @@ use std::{
 fn main() {
     let port = "7878";
     let listener = TcpListener::bind(format!("127.0.0.1:{}", 7878)).unwrap();
+    let pool = Threadpool::new(4);
 
     println!("Listending on {}", port);
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        thread::spawn(|| {
+        pool::execute(|| {
             handle_connection(stream);
         });
     }
