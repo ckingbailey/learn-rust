@@ -1,10 +1,13 @@
 use clap::Parser;
+use std::fs::File;
+use std::io::{BufReader, BufRead};
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
     pattern: String,
-    file_path: std::path::PathBuf
+    file_path: PathBuf
 }
 
 fn main() {
@@ -12,17 +15,25 @@ fn main() {
 
     println!("pattern: {:?}, path: {:?}", cli.pattern, cli.file_path);
 
-    // let path_slc = &file_path[..];
-    let contents = match std::fs::read_to_string(&cli.file_path) {
-        Ok(contents) => contents,
-        Err(_) => panic!("Could not read file {:#?}", cli.file_path)
+    let f = match File::open(&cli.file_path) {
+        Ok(handle) => handle,
+        Err(_) => panic!("Could not open file {:#?}", cli.file_path)
     };
+    let mut reader = BufReader::new(f);
 
-    println!("Read {} chars from file", contents.len());
+    let mut line = String::new();
 
-    for content_line in contents.split('\n') {
-        if content_line.contains(&cli.pattern) {
-            println!("{}", content_line);
+    loop {
+        let res = reader.read_line(&mut line).expect("Unable to read line");
+
+        if res == 0 {
+            break;
         }
+
+        if line.contains(&cli.pattern) {
+            println!("{}", line);
+        }
+
+        line.clear();
     }
 }
