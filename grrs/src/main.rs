@@ -31,7 +31,7 @@ fn main() {
         }
 
         if line.contains(&cli.pattern) {
-            println!("{}", line);
+            println!("{}", line.trim());
         }
 
         line.clear();
