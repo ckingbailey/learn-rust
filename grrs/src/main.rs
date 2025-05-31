@@ -4,7 +4,11 @@ fn main() {
 
     println!("pattern: {:?}, path: {:?}", pattern, file_path);
 
-    let contents: String = std::fs::read_to_string(file_path).expect("Could not read file");
+    let path_slc = &file_path[..];
+    let contents = match std::fs::read_to_string(path_slc) {
+        Ok(contents) => contents,
+        Err(_) => panic!("Could not read file {}", path_slc)
+    };
 
     println!("Read {} chars from file", contents.len());
 }
