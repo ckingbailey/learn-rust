@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{BufReader, BufRead, Read};
 use std::path::PathBuf;
+use onig::Regex;
 
 pub fn open_file_reader(file_path: &PathBuf) -> BufReader<File> {
     let f = match File::open(file_path) {
@@ -11,10 +12,15 @@ pub fn open_file_reader(file_path: &PathBuf) -> BufReader<File> {
     BufReader::new(f)
 }
 
-pub fn search<R>(pat: &str, mut reader: BufReader<R>)
+pub fn search<R>(search_str: &str, mut reader: BufReader<R>)
 where
     R: Read
 {
+    let pat = Regex::new(search_str)
+        .unwrap_or_else(
+            |_| panic!("Could not parse string {} as regex", search_str)
+        );
+
     // QUESTION: Is it more efficient to create a new String buffer on every loop?
     // By creating the unsized String outside the loop, it has to be reallocated on every loop anyway
     let mut line = String::new();
@@ -26,7 +32,7 @@ where
             break;
         }
 
-        if line.contains(&pat) {
+        if pat.find(&line).is_some() {
             println!("{}", line.trim());
         }
 
