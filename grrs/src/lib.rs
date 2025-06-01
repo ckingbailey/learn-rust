@@ -4,10 +4,10 @@ use std::path::PathBuf;
 use onig::Regex;
 
 pub fn open_file_reader(file_path: &PathBuf) -> BufReader<File> {
-    let f = match File::open(file_path) {
-        Ok(handle) => handle,
-        Err(_) => panic!("Could not open file {:#?}", file_path)
-    };
+    let f = File::open(file_path)
+        .unwrap_or_else(
+            |_| panic!("Could not open file {:#?}", file_path)
+        );
     
     BufReader::new(f)
 }
