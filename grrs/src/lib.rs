@@ -26,9 +26,9 @@ where
     let mut line = String::new();
 
     loop {
-        let res = reader.read_line(&mut line).expect("Unable to read line");
+        let len = reader.read_line(&mut line).expect("Unable to read line");
 
-        if res == 0 {
+        if len == 0 {
             break;
         }
 
