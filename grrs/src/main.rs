@@ -1,6 +1,7 @@
-use clap::Parser;
 use std::path::PathBuf;
-use grrs::{ open_file_reader, search };
+use clap::Parser;
+use corosensei::CoroutineResult;
+use grrs::{ open_file_reader, make_searcher };
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -14,5 +15,11 @@ fn main() {
 
     let reader = open_file_reader(&cli.file_path);
 
-    search(&cli.search_str, reader);
+    let search = make_searcher(reader);
+    loop {
+        match search.resume(&cli.search_str) {
+            CoroutineResult::Yield(i) => println!("{}", i),
+            CoroutineResult::Return(()) => break,
+        }
+    }
 }
