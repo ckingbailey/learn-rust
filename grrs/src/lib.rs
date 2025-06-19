@@ -12,6 +12,13 @@ pub fn open_file_reader(file_path: &PathBuf) -> BufReader<File> {
     BufReader::new(f)
 }
 
+pub fn make_search_pattern(&search_str: &str) -> Regex {
+    Regex::new(search_str)
+        .unwrap_or_else(
+            |_| panic!("Cloud not parse string {} as regex", search_str)
+        )
+}
+
 pub fn search<R>(search_str: &str, mut reader: BufReader<R>)
 where
     R: Read
