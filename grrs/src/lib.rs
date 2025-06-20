@@ -12,37 +12,38 @@ pub fn open_file_reader(file_path: &PathBuf) -> BufReader<File> {
     BufReader::new(f)
 }
 
-pub fn make_search_pattern(&search_str: &str) -> Regex {
+pub fn make_search_pattern(search_str: &str) -> Regex {
     Regex::new(search_str)
         .unwrap_or_else(
             |_| panic!("Cloud not parse string {} as regex", search_str)
         )
 }
 
-pub fn search<R>(search_str: &str, mut reader: BufReader<R>)
+pub enum SearchResult {
+    Match(String),
+    NoMatch,
+    End,
+}
+
+pub fn make_searcher<R>(search_pattern: Regex) -> impl Fn(&BufReader<R>) -> SearchResult
 where
     R: Read
 {
-    let pat = Regex::new(search_str)
-        .unwrap_or_else(
-            |_| panic!("Could not parse string {} as regex", search_str)
-        );
-
-    // QUESTION: Is it more efficient to create a new String buffer on every loop?
-    // By creating the unsized String outside the loop, it has to be reallocated on every loop anyway
-    let mut line = String::new();
-
-    loop {
+    |mut reader: &BufReader<R>| -> SearchResult {
+        // QUESTION: Is it more efficient to create a new String buffer on every loop?
+        // By creating the unsized String outside the loop, it has to be reallocated on every loop anyway
+        let mut line = String::new();
+    
         let len = reader.read_line(&mut line).expect("Unable to read line");
-
+    
         if len == 0 {
-            break;
+            return SearchResult::End
         }
-
-        if pat.find(&line).is_some() {
-            println!("{}", line.trim());
+    
+        if search_pattern.find(&line).is_some() {
+            SearchResult::Match(line);
         }
-
-        line.clear();
+    
+        SearchResult::NoMatch
     }
 }
