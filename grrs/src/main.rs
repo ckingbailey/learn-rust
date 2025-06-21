@@ -1,6 +1,6 @@
 use clap::Parser;
 use std::path::PathBuf;
-use grrs::{ make_search_pattern, open_file_reader, make_searcher };
+use grrs::{ SearchResult, make_search_pattern, open_file_reader, make_searcher };
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -14,9 +14,13 @@ fn main() {
 
     let reader = open_file_reader(&cli.file_path);
     let pat = make_search_pattern(&cli.search_str);
-    let search = make_searcher(pat);
+    let mut search_next_line = make_searcher(pat, reader);
 
     loop {
-        search(reader);
+        match search_next_line() {
+            SearchResult::Match(line) => println!("{}", line.trim()),
+            SearchResult::NoMatch => continue,
+            SearchResult::End => break,
+        };
     }
 }

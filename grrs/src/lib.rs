@@ -21,21 +21,25 @@ pub enum SearchResult {
     End,
 }
 
-pub fn read_next_line<R>(mut reader: &BufReader<R>) -> Option<String>
+pub fn make_searcher<R>(search_pattern: Regex, mut reader: BufReader<R>) -> impl FnMut() -> SearchResult
 where
     R: Read,
 {
-    let mut line = String::new();
-
-    let len = reader.read_line(&mut line).expect("Unable to read line");
-
-    if len == 0 {
-        return None;
+    move || -> SearchResult {
+        // QUESTION: Is it more efficient to create a new String buffer on every loop?
+        // By creating the unsized String outside the loop, it has to be reallocated on every loop anyway
+        let mut line = String::new();
+    
+        let len = reader.read_line(&mut line).expect("Unable to read line");
+    
+        if len == 0 {
+            return SearchResult::End
+        }
+    
+        if search_pattern.find(&line).is_some() {
+            return SearchResult::Match(line)
+        }
+    
+        SearchResult::NoMatch
     }
-
-    Some(line)
-}
-
-pub fn search(line: &str, pattern: &Regex) -> Option<str> {
-    search_pattern.find(&line)
 }
